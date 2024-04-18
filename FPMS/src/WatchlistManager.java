@@ -17,13 +17,16 @@ public class WatchlistManager {
    *
    * @param connection the connection
    */
-  public WatchlistManager(Connection connection) {
+  public WatchlistManager(Connection connection, Scanner scanner) {
     this.connection = connection;
+    this.scanner = scanner;
   }
 
   private void showWatchList() throws SQLException {
-    String query = "{CALL show_watchlist}";
+    Utility utility = new Utility(connection, scanner);
+    String query = "{CALL show_watchlist(?)}";
     CallableStatement stmt = connection.prepareCall(query);
+    stmt.setString(1, utility.getUsername());
     ResultSet rs = stmt.executeQuery();
     System.out.println("-------- Below is your watchlist --------");
     System.out.printf("%-10s %-20s %-20s%n", "securityID", "securityName", "securityType");
@@ -63,7 +66,7 @@ public class WatchlistManager {
           if (scanner.hasNext()) {
             securityID = scanner.nextInt();
           }
-          SecurityManager securityManager = new SecurityManager(connection);
+          SecurityManager securityManager = new SecurityManager(connection, scanner);
           securityManager.historicalPrice(securityID);
         } catch (SQLException e) {
           System.out.println(e.getMessage());

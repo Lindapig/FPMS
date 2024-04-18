@@ -18,8 +18,9 @@ public class SecurityManager {
    *
    * @param connection the connection
    */
-  public SecurityManager(Connection connection) {
+  public SecurityManager(Connection connection, Scanner scanner) {
     this.connection = connection;
+    this.scanner = scanner;
   }
 
   private void getAllSecurities() throws SQLException {
@@ -49,7 +50,7 @@ public class SecurityManager {
   }
 
   private void buySecurity(int securityID, int portfolioID) throws SQLException {
-    Utility utility = new Utility(connection);
+    Utility utility = new Utility(connection, scanner);
     float amount = 0;
     utility.checkBalance();
     System.out.print("\nPlease enter how many securities do you want to buy?");
@@ -65,23 +66,23 @@ public class SecurityManager {
     System.out.println(message);
   }
 
-  private void checkWithholdingSecurity(int securityID) throws SQLException {
-    String query = "{CALL check_withholding_security(?)}";
+  private void checkWithholdingSecurity(int securityID, int portfolioID) throws SQLException {
+    String query = "{CALL check_withholding_security(?, ?)}";
     PreparedStatement stmt = connection.prepareStatement(query);
     stmt.setInt(1, securityID);
+    stmt.setInt(2, portfolioID);
     ResultSet rs = stmt.executeQuery();
-    System.out.println("Below is withholding status for this security:");
-    System.out.printf("%-10s %-20s %-15s %-10s %-20s %-20s %-20s%n", "securityID", "securityName",
-            "securityType", "quantity", "costBase", "marketValue", "gain/loss");
+    System.out.println("---------- Below is withholding status for this security ----------");
+    System.out.printf("%-10s %-10s %-10s %-15s %-15s %-15s%n", "securityID", "portfolioID",
+            "quantity", "costBase", "marketValue", "gain/loss");
     if (rs.next()) {
-      System.out.printf("%-10s %-20s %-15s %-10s %-20s %-20s %-20s%n",
+      System.out.printf("%-10s %-10s %-10s %-15s %-15s %-15s%n",
               rs.getInt(1),
-              rs.getString(2),
-              rs.getString(3),
+              rs.getInt(2),
+              rs.getInt(3),
               rs.getFloat(4),
               rs.getFloat(5),
-              rs.getFloat(6),
-              rs.getFloat(7)
+              rs.getFloat(6)
       );
     }
     rs.close();
@@ -96,17 +97,17 @@ public class SecurityManager {
    * @throws SQLException the sql exception
    */
   void sellSecurity(int securityID, int portfolioID) throws SQLException {
-    checkWithholdingSecurity(securityID);
-    float amount = 0;
+    checkWithholdingSecurity(securityID, portfolioID);
+    int quantity = 0;
     System.out.print("\nPlease enter how many securities do you want to sell? ");
     if (scanner.hasNext()) {
-      amount = scanner.nextFloat();
+      quantity = scanner.nextInt();
     }
-    String query = "{CALL sell(?)}";
+    String query = "{CALL sell(?, ?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
     stmt.setInt(1, securityID);
-    stmt.setFloat(2, portfolioID);
-    stmt.setFloat(3, amount);
+    stmt.setInt(2, portfolioID);
+    stmt.setInt(3, quantity);
     String message = "Sold security " + securityID + " successfully!";
     System.out.println(message);
   }

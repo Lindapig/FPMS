@@ -17,8 +17,9 @@ public class AccountManager {
    *
    * @param connection the connection
    */
-  public AccountManager(Connection connection) {
+  public AccountManager(Connection connection, Scanner scanner) {
     this.connection = connection;
+    this.scanner = scanner;
   }
 
   private void deposit() throws SQLException {
@@ -53,6 +54,7 @@ public class AccountManager {
     System.out.print("\nEnter the transactionID that you want to review? ");
     if (scanner.hasNext()) {
       transactionID = scanner.nextInt();
+      System.out.println(transactionID);
     }
     String query = "{CALL select_transaction(?)}";
     CallableStatement stmt = connection.prepareCall(query);
@@ -77,10 +79,10 @@ public class AccountManager {
     String query = "{CALL all_transactions}";
     CallableStatement stmt = connection.prepareCall(query);
     ResultSet rs = stmt.executeQuery();
-    System.out.println("-------- Below are all the transactions --------");
+    System.out.println("------------------ Below are all the transactions ------------------");
     System.out.printf("%-10s %-20s %-20s %-20s%n", "transactionID", "transactionDate",
             "transactionType", "transactionAmount");
-    if (rs.next()) {
+    while (rs.next()) {
       System.out.printf("%-10s %-20s %-20s %-20s%n",
               rs.getInt(1),
               rs.getString(2),
@@ -95,14 +97,14 @@ public class AccountManager {
    */
   public void accountMenu() {
     while (true) {
-      System.out.println("\nAccount Menu: 1. Check balance 2. Deposit 3. Withdraw "
+      System.out.println("Account Menu: 1. Check balance 2. Deposit 3. Withdraw "
               + "4. Search transaction 5. Back to main menu");
       System.out.print("Enter your choice: ");
       int choice = scanner.nextInt();
       if (choice == 1) {
         // Logic to check account balance
         try {
-          Utility utility = new Utility(connection);
+          Utility utility = new Utility(connection, scanner);
           utility.checkBalance();
         } catch (SQLException e) {
           System.out.println("Failed to check the balance.");

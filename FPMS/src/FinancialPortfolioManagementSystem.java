@@ -1,5 +1,7 @@
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -8,6 +10,13 @@ import java.util.Scanner;
 public class FinancialPortfolioManagementSystem {
   private Scanner scanner;
   private Connection connection;
+  private static final String serverName = "localhost";
+  private static final int portNumber = 3306;
+  private static final String dbName = "fpms";
+
+  private String sqlUserName;
+  private String sqlPassword;
+
 
   /**
    * Instantiates a new Financial portfolio management system.
@@ -20,75 +29,145 @@ public class FinancialPortfolioManagementSystem {
     this.connection = connection;
   }
 
-  private void run() {
-    try {
-      Utility utility = new Utility(connection);
-      // login to the database system
-      utility.getLogin();
-      DatabaseConnector connector = new DatabaseConnector();
-      connection = connector.getConnection(utility.getSQLUsername(), utility.getSQLPassword());
-      UserManager userManager = new UserManager(connection);
-      SecurityManager securityManager = new SecurityManager(connection);
-      PortfolioManager portfolioManager = new PortfolioManager(connection);
-      WatchlistManager watchlistManager = new WatchlistManager(connection);
-      AccountManager accountManager = new AccountManager(connection);
+  /**
+   * Sets sql username.
+   *
+   * @param username the sql username
+   */
+  public void setSQLUsername(String username) {
+    sqlUserName = username;
+  }
 
-      boolean loggedIn = false;
-      while (true) {
-        utility.welcomeMessage();
-        if (!loggedIn) {
-          int choice = utility.loginOrRegister();
-          if (choice == 1) {
-            System.out.println("Please enter your username");
-            utility.setUsername(scanner.next());
-            System.out.println("Please enter your password");
-            utility.setPassword(scanner.next());
+  /**
+   * Sets sql password.
+   *
+   * @param password the sql password
+   */
+  public void setSQLPassword(String password) {
+    sqlPassword = password;
+  }
+
+  /**
+   * Gets sql username.
+   *
+   * @return the sql username
+   */
+  public String getSQLUsername() {
+    return sqlUserName;
+  }
+
+  /**
+   * Gets sql password.
+   *
+   * @return the sql password
+   */
+  public String getSQLPassword() {
+    return sqlPassword;
+  }
+
+  public void getLogin() {
+    System.out.println("Please enter your MySQL username");
+    if (scanner.hasNext()) {
+      setSQLUsername(scanner.next());
+    }
+    System.out.println("Please enter your MySQL password");
+    if (scanner.hasNext()) {
+      setSQLPassword(scanner.next());
+    }
+  }
+
+  public void getConnection() throws SQLException {
+    Properties connectionProps = new Properties();
+    connectionProps.put("user", this.sqlUserName);
+    connectionProps.put("password", this.sqlPassword);
+    this.connection = DriverManager.getConnection("jdbc:mysql://"
+            + serverName + ":" + portNumber
+            + "/" + dbName
+            + "?characterEncoding=UTF-8&useSSL=false", connectionProps);
+  }
+
+  private void run() throws SQLException {
+    try {
+      // login to the database system
+      getLogin();
+      getConnection();
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    Utility utility = new Utility(connection, scanner);
+    UserManager userManager = new UserManager(connection, scanner);
+    SecurityManager securityManager = new SecurityManager(connection, scanner);
+    PortfolioManager portfolioManager = new PortfolioManager(connection, scanner);
+    WatchlistManager watchlistManager = new WatchlistManager(connection, scanner);
+    AccountManager accountManager = new AccountManager(connection, scanner);
+
+    boolean loggedIn = false;
+    while (true) {
+      utility.welcomeMessage();
+      if (!loggedIn) {
+        int choice = utility.loginOrRegister();
+        if (choice == 1) {
+          try {
+            utility.setUsername();
+            utility.setPassword();
             loggedIn = userManager.userLogin(utility.getUsername(), utility.getPassword());
-          } else if (choice == 2) {
-            System.out.println("Please enter username:");
-            String username = scanner.next();
-            System.out.println("Please enter password:");
-            String password = scanner.next();
-            System.out.println("Please enter email:");
-            String email = scanner.next();
-            userManager.registerUser(username, password, email);
-          } else {
-            System.out.println("Invalid choice. Please try again.");
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
           }
+        } else if (choice == 2) {
+          try {
+            userManager.registerUser();
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
+          }
+        } else if (choice == 3) {
+          System.out.println("Thank you for using FPMS, see you around.");
+          connection.close();
+          scanner.close();
+          break;
         } else {
-          int menuChoice = utility.displayMainMenu();
-          if (menuChoice == 1) {
+          System.out.println("Invalid choice. Please try again.");
+        }
+      } else {
+        int menuChoice = utility.displayMainMenu();
+        if (menuChoice == 1) {
+          try {
             // Securities menu
             securityManager.securitiesMenu();
-          } else if (menuChoice == 2) {
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
+          }
+        } else if (menuChoice == 2) {
+          try {
             // Watchlist menu
             watchlistManager.watchlistMenu();
-          } else if (menuChoice == 3) {
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
+          }
+        } else if (menuChoice == 3) {
+          try {
             // Portfolio menu
             portfolioManager.portfolioMenu();
-          } else if (menuChoice == 4) {
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
+          }
+        } else if (menuChoice == 4) {
+          try {
             // Account menu
             accountManager.accountMenu();
-          } else if (menuChoice == 5) {
-            loggedIn = false;
-            System.out.println("Thank you for using FPMS, see you around.");
-          } else if (menuChoice == 6) {
-            break;
-          } else {
-            System.out.println("Invalid choice. Please try again.");
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
           }
-        }
-      }
-    } catch (SQLException e) {
-      System.out.println("Failed to load the program. Please try again.");
-      e.printStackTrace();
-    } finally {
-      try {
-        if (connection != null && !connection.isClosed()) {
+        } else if (menuChoice == 5) {
+          loggedIn = false;
+        } else if (menuChoice == 6) {
+          System.out.println("Thank you for using FPMS, see you around.");
           connection.close();
+          scanner.close();
+          break;
+        } else {
+          System.out.println("Invalid choice. Please try again.");
         }
-      } catch (SQLException e) {
-        e.printStackTrace();
       }
     }
   }
@@ -101,8 +180,12 @@ public class FinancialPortfolioManagementSystem {
   public static void main(String[] args) {
     Scanner scanner = new Scanner(System.in);
     FinancialPortfolioManagementSystem fms = new FinancialPortfolioManagementSystem(scanner, null);
-    fms.run();
-    scanner.close();
+    try {
+      fms.run();
+      scanner.close();
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }
 
