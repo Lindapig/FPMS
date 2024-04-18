@@ -10,65 +10,35 @@ import java.util.Scanner;
 public class Utility {
   private Scanner scanner;
   private Connection connection;
-  private String sqlUserName;
-  private String sqlPassword;
 
   private String username;
 
   private String password;
 
-  /**
-   * Sets sql username.
-   *
-   * @param sqlUsername the sql username
-   */
-  public void setSQLUsername(String sqlUsername) {
-    sqlUserName = sqlUsername;
-  }
 
-  /**
-   * Sets sql password.
-   *
-   * @param sqlPassword the sql password
-   */
-  public void setSQLPassword(String sqlPassword) {
-    sqlPassword = sqlPassword;
-  }
-
-  /**
-   * Gets sql username.
-   *
-   * @return the sql username
-   */
-  public String getSQLUsername() {
-    return sqlUserName;
-  }
-
-  /**
-   * Gets sql password.
-   *
-   * @return the sql password
-   */
-  public String getSQLPassword() {
-    return sqlPassword;
-  }
 
   /**
    * Sets username.
    *
-   * @param userName the user name
+   *
    */
-  public void setUsername(String userName) {
-    username = userName;
+  public void setUsername() {
+    System.out.println("Please enter your username");
+    if (scanner.hasNext()) {
+      username = scanner.next().toLowerCase();
+    }
   }
 
   /**
    * Sets password.
    *
-   * @param password the password
+   *
    */
-  public void setPassword(String password) {
-    password = password;
+  public void setPassword() {
+    System.out.println("Please enter your password");
+    if (scanner.hasNext()) {
+      password = scanner.next();
+    }
   }
 
   /**
@@ -77,7 +47,7 @@ public class Utility {
    * @return the username
    */
   public String getUsername() {
-    return username;
+    return this.username;
   }
 
   /**
@@ -88,34 +58,21 @@ public class Utility {
   public String getPassword() {
     return password;
   }
-
-  /**
-   * Gets login.
-   */
-  public void getLogin() {
-    System.out.println("Please enter your MySQL username");
-    if (scanner.hasNext()) {
-      setSQLUsername(scanner.next());
-    }
-    System.out.println("Please enter your MySQL password");
-    if (scanner.hasNext()) {
-      setSQLPassword(scanner.next());
-    }
-  }
-
   /**
    * Instantiates a new Utility.
    *
    * @param connection the connection
    */
-  public Utility(Connection connection) {
+  public Utility(Connection connection, Scanner scanner) {
     this.connection = connection;
+    this.scanner = scanner;
   }
 
   /**
    * Welcome message.
    */
   public void welcomeMessage() {
+    System.out.println("=====================================================");
     System.out.println("Welcome to the Financial Portfolio Management System.");
   }
 
@@ -125,8 +82,8 @@ public class Utility {
    * @return the int
    */
   public int loginOrRegister() {
-    System.out.println("1. Login 2. Register");
-    System.out.print("Enter your choice: ");
+    System.out.println("1. Login 2. Register 3. Exit");
+    System.out.println("Enter your choice: ");
     if (scanner.hasNext()) {
       return scanner.nextInt();
     }
@@ -158,9 +115,11 @@ public class Utility {
   public void checkBalance() throws SQLException {
     String query = "{CALL check_balance(?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setString(1, getUsername());
+    stmt.setString(1, this.username);
+    System.out.println(this.username);
     ResultSet rs = stmt.executeQuery();
     System.out.println("Below is your account balance:");
+//    System.out.printf("%-10s%n", "accountID");
     System.out.printf("%-10s %-15s%n", "accountID", "accountBalance");
     if (rs.next()) {
       System.out.printf("%-10s %-15s%n",

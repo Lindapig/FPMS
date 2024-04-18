@@ -17,15 +17,16 @@ public class PortfolioManager {
    *
    * @param connection the connection
    */
-  public PortfolioManager(Connection connection) {
+  public PortfolioManager(Connection connection, Scanner scanner) {
     this.connection = connection;
+    this.scanner = scanner;
   }
 
   private void showPortfolio() throws SQLException {
     String query = "{CALL all_portfolios}";
     PreparedStatement stmt = connection.prepareStatement(query);
     ResultSet rs = stmt.executeQuery();
-    System.out.println("-------- Below are your portfolios --------");
+    System.out.println("------------------ Below are your portfolios ------------------");
     System.out.printf("%-10s %-20s %-15s %-15s%n", "portfolioID", "portfolioName", "quantity", "gain/loss");
     while (rs.next()) {
       System.out.printf("%-10s %-20s %-15s %-15s%n",
@@ -55,7 +56,7 @@ public class PortfolioManager {
           if (scanner.hasNext()) {
             securityID = scanner.nextInt();
           }
-          SecurityManager securityManager = new SecurityManager(connection);
+          SecurityManager securityManager = new SecurityManager(connection, scanner);
           securityManager.sellSecurity(securityID, portfolioID);
         } catch (Exception e) {
           System.out.println("Not able to sell the security.");
@@ -74,14 +75,14 @@ public class PortfolioManager {
     PreparedStatement stmt = connection.prepareStatement(query);
     stmt.setInt(1, portfolioID);
     ResultSet rs = stmt.executeQuery();
-    System.out.printf("%-10s %-20s %-15s %-15s %-10s%n", "securityID",
+    System.out.printf("%-10s %-20s %-15s %-15s%n", "securityID",
             "securityName", "quantity", "gain/loss");
     while (rs.next()) {
-      System.out.printf("%-10s %-20s %-15s %-15s %-10s%n",
+      System.out.printf("%-10s %-20s %-15s %-15s%n",
               rs.getInt(1),
               rs.getString(2),
-              rs.getFloat(3),
-              rs.getFloat(4)
+              rs.getInt(4),
+              rs.getFloat(8)
       );
     }
     rs.close();
@@ -110,6 +111,7 @@ public class PortfolioManager {
             portfolioID = scanner.nextInt();
           }
           selectPortfolio(portfolioID);
+          selectedPortfolioMenu(portfolioID);
         } catch (Exception e) {
           System.out.println(e.getMessage());
         }
