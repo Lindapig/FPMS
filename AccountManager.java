@@ -22,7 +22,7 @@ public class AccountManager {
     this.scanner = scanner;
   }
 
-  private void deposit(int userID) throws SQLException {
+  private void deposit() throws SQLException {
     float amount = 0;
     System.out.print("\nHow much money($) do you want to deposit in your account? ");
     if (scanner.hasNext()) {
@@ -30,15 +30,16 @@ public class AccountManager {
     }
     String query = "{CALL deposit(?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setInt(1, userID);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     stmt.setFloat(2, amount);
     stmt.execute();
+    stmt.close();
     String message = "Deposit " + amount + " in your account successfully!";
     System.out.println(message);
 
   }
 
-  private void withdraw(int userID) throws SQLException {
+  private void withdraw() throws SQLException {
     float amount = 0;
     System.out.print("\nHow much money($) do you want to withdraw from your account? ");
     if (scanner.hasNext()) {
@@ -46,9 +47,10 @@ public class AccountManager {
     }
     String query = "{CALL withdraw(?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setInt(1, userID);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     stmt.setFloat(2, amount);
     stmt.execute();
+    stmt.close();
     String message = "Withdraw " + amount + " from your account successfully!";
     System.out.println(message);
   }
@@ -58,16 +60,15 @@ public class AccountManager {
     System.out.print("\nEnter the transactionID that you want to review? ");
     if (scanner.hasNext()) {
       transactionID = scanner.nextInt();
-      System.out.println(transactionID);
     }
     String query = "{CALL select_transaction(?)}";
     CallableStatement stmt = connection.prepareCall(query);
     stmt.setInt(1, transactionID);
     ResultSet rs = stmt.executeQuery();
-    System.out.printf("%-10s %-15s %-15s %-15s %-20s %-10s %-20s%n", "transactionID", "transactionDate",
+    System.out.printf("%-15s %-15s %-15s %-15s %-20s %-10s %-10s%n", "transactionID", "transactionDate",
             "transactionType", "transactionAmount", "securityName", "securityID", "securityType");
     if (rs.next()) {
-      System.out.printf("%-10s %-15s %-15s %-15s %-20s %-10s %-20s%n",
+      System.out.printf("%-15s %-15s %-15s %-15s %-20s %-10s %-10s%n",
               rs.getInt(1),
               rs.getString(2),
               rs.getString(3),
@@ -80,8 +81,9 @@ public class AccountManager {
   }
 
   private void showTransactions() throws SQLException {
-    String query = "{CALL all_transactions}";
+    String query = "{CALL all_transactions(?)}";
     CallableStatement stmt = connection.prepareCall(query);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     ResultSet rs = stmt.executeQuery();
     System.out.println("------------------ Below are all the transactions ------------------");
     System.out.printf("%-10s %-20s %-20s %-20s%n", "transactionID", "transactionDate",
@@ -99,7 +101,7 @@ public class AccountManager {
   /**
    * Account menu.
    */
-  public void accountMenu(int userID) {
+  public void accountMenu() {
     while (true) {
       System.out.println("Account Menu: 1. Check balance 2. Deposit 3. Withdraw "
               + "4. Search transaction 5. Back to main menu");
@@ -117,7 +119,7 @@ public class AccountManager {
       } else if (choice == 2) {
         // Logic for deposit
         try {
-          deposit(userID);
+          deposit();
         } catch (SQLException e) {
           System.out.println("Failed to deposit.");
           System.out.println(e.getMessage());
@@ -125,7 +127,7 @@ public class AccountManager {
       } else if (choice == 3) {
         // Logic for withdrawal
         try {
-          withdraw(userID);
+          withdraw();
         } catch (SQLException e) {
           System.out.println("Failed to withdraw.");
           System.out.println(e.getMessage());

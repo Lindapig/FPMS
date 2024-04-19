@@ -54,13 +54,10 @@ public class UserManager {
     try {
       System.out.println("Please enter username:");
       String username = scanner.next();
-      System.out.println(username);
       System.out.println("Please enter password:");
       String password = scanner.next();
-      System.out.println(password);
       System.out.println("Please enter email:");
       String email = scanner.next();
-      System.out.println(email);
       // Registration logic here
       String query = "{CALL add_new_user(?, ?, ?)}";
       CallableStatement stmt = connection.prepareCall(query);

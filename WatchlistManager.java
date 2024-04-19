@@ -26,7 +26,7 @@ public class WatchlistManager {
     Utility utility = new Utility(connection, scanner);
     String query = "{CALL show_watchlist(?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setString(1, utility.getUsername());
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     ResultSet rs = stmt.executeQuery();
     System.out.println("-------- Below is your watchlist --------");
     System.out.printf("%-10s %-20s %-20s%n", "securityID", "securityName", "securityType");
@@ -43,6 +43,8 @@ public class WatchlistManager {
     String query = "{CALL delete_from_watchlist(?)}";
     CallableStatement stmt = connection.prepareCall(query);
     stmt.setInt(1, securityID);
+    stmt.execute();
+    stmt.close();
     String message = "Security" + securityID + "is deleted from the watchlist successfully!";
     System.out.println(message);
   }

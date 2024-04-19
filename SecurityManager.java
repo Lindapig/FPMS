@@ -13,6 +13,7 @@ public class SecurityManager {
 
   private Scanner scanner;
 
+
   /**
    * Instantiates a new Security manager.
    *
@@ -39,15 +40,15 @@ public class SecurityManager {
     ps.close();
   }
 
-  private void addToWatchlist(int userID, int securityID) throws SQLException {
+  private void addToWatchlist(int securityID) throws SQLException {
     String query = "{CALL add_to_watchlist(?, ?)}";
     PreparedStatement stmt = connection.prepareStatement(query);
-    stmt.setInt(1, userID);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     stmt.setInt(2, securityID);
-    stmt.executeUpdate();
+    stmt.execute();
+    stmt.close();
     String message = "Security " + securityID + " is added to watchlist successfully!";
     System.out.println(message);
-    stmt.close();
   }
 
   private void buySecurity(int securityID, int portfolioID) throws SQLException {
@@ -63,6 +64,8 @@ public class SecurityManager {
     stmt.setInt(1, securityID);
     stmt.setInt(2, portfolioID);
     stmt.setFloat(3, amount);
+    stmt.execute();
+    stmt.close();
     String message = "Bought security " + securityID + " successfully!";
     System.out.println(message);
   }
@@ -109,6 +112,8 @@ public class SecurityManager {
     stmt.setInt(1, securityID);
     stmt.setInt(2, portfolioID);
     stmt.setInt(3, quantity);
+    stmt.execute();
+    stmt.close();
     String message = "Sold security " + securityID + " successfully!";
     System.out.println(message);
   }
@@ -139,7 +144,6 @@ public class SecurityManager {
   private void selectedSecurityMenu(int securityID) {
     int choice = 0;
     int portfolioID = 0;
-    int userID = 0; // Initialize user id variable
     while (true) {
       System.out.println("1. Add to watchlist 2. Buy 3. Sell 4. View historical price 5. Back");
       System.out.print("Enter your choice: ");
@@ -147,16 +151,8 @@ public class SecurityManager {
         choice = scanner.nextInt();
       }
       if (choice == 1) {
-        // Prompt user to enter user id
-        System.out.print("Enter the amount to add to the watchlist");
-        if (scanner.hasNextInt()) {
-          userID = scanner.nextInt();
-        } else {
-          System.out.println("Invalid input for amount. Please enter a valid number.");
-          continue; // Continue to the next iteration of the loop
-        }
         try {
-          addToWatchlist(userID, securityID);
+          addToWatchlist(securityID);
         } catch (SQLException e) {
           System.out.println("Failed to add to the watchlist.");
           System.out.println(e.getMessage());
@@ -203,18 +199,15 @@ public class SecurityManager {
     CallableStatement stmt = connection.prepareCall(query);
     stmt.setInt(1, securityID);
     ResultSet rs = stmt.executeQuery();
-    System.out.printf("%-10s %-20s %-20s %-20s %-10s %-20s %-20s %-20s%n", "id", "name", "type",
-            "withholdingQuantity", "portfolioID", "costBase", "marketValue", "Gain/loss");
+    System.out.printf("%-10s %-10s %-10s %-15s %-15s%n", "id", "name", "type",
+            "costBase", "marketValue");
     if (rs.next()) {
-      System.out.printf("%-10s %-20s %-20s %-20s %-10s %-20s %-20s %-20s%n",
+      System.out.printf("%-10s %-10s %-10s %-15s %-15s%n",
               rs.getInt(1),
               rs.getString(2),
               rs.getString(3),
-              rs.getFloat(4),
-              rs.getInt(5),
               rs.getFloat(6),
-              rs.getFloat(7),
-              rs.getFloat(8)
+              rs.getFloat(7)
       );
     }
     try {

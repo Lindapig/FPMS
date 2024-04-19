@@ -23,8 +23,9 @@ public class PortfolioManager {
   }
 
   private void showPortfolio() throws SQLException {
-    String query = "{CALL all_portfolios}";
+    String query = "{CALL all_portfolios(?)}";
     PreparedStatement stmt = connection.prepareStatement(query);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     ResultSet rs = stmt.executeQuery();
     System.out.println("------------------ Below are your portfolios ------------------");
     System.out.printf("%-10s %-20s %-15s %-15s%n", "portfolioID", "portfolioName", "quantity", "gain/loss");
@@ -71,9 +72,10 @@ public class PortfolioManager {
   }
 
   private void selectPortfolio(int portfolioID) throws SQLException {
-    String query = "{CALL select_portfolio(?)}";
+    String query = "{CALL select_portfolio(?, ?)}";
     PreparedStatement stmt = connection.prepareStatement(query);
-    stmt.setInt(1, portfolioID);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
+    stmt.setInt(2, portfolioID);
     ResultSet rs = stmt.executeQuery();
     System.out.printf("%-10s %-20s %-15s %-15s%n", "securityID",
             "securityName", "quantity", "gain/loss");

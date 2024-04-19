@@ -17,6 +17,8 @@ public class FinancialPortfolioManagementSystem {
   private String sqlUserName;
   private String sqlPassword;
 
+  public static String userName;
+
 
   /**
    * Instantiates a new Financial portfolio management system.
@@ -65,6 +67,7 @@ public class FinancialPortfolioManagementSystem {
     return sqlPassword;
   }
 
+
   public void getLogin() {
     System.out.println("Please enter your MySQL username");
     if (scanner.hasNext()) {
@@ -110,7 +113,8 @@ public class FinancialPortfolioManagementSystem {
           try {
             utility.setUsername();
             utility.setPassword();
-            loggedIn = userManager.userLogin(utility.getUsername(), utility.getPassword());
+            userName = utility.getUsername();
+            loggedIn = userManager.userLogin(userName, utility.getPassword());
           } catch (Exception e) {
             System.out.println(e.getMessage());
           }
@@ -129,10 +133,6 @@ public class FinancialPortfolioManagementSystem {
           System.out.println("Invalid choice. Please try again.");
         }
       } else {
-        // Prompt for userID here
-        System.out.print("Enter your userID: ");
-        int userID = scanner.nextInt();
-
         int menuChoice = utility.displayMainMenu();
         if (menuChoice == 1) {
           try {
@@ -158,7 +158,7 @@ public class FinancialPortfolioManagementSystem {
         } else if (menuChoice == 4) {
           try {
             // Account menu
-            accountManager.accountMenu(userID);
+            accountManager.accountMenu();
           } catch (Exception e) {
             System.out.println(e.getMessage());
           }

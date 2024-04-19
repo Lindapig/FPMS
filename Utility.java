@@ -15,8 +15,6 @@ public class Utility {
 
   private String password;
 
-
-
   /**
    * Sets username.
    *
@@ -115,11 +113,9 @@ public class Utility {
   public void checkBalance() throws SQLException {
     String query = "{CALL check_balance(?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setString(1, this.username);
-    System.out.println(this.username);
+    stmt.setString(1, FinancialPortfolioManagementSystem.userName);
     ResultSet rs = stmt.executeQuery();
     System.out.println("Below is your account balance:");
-//    System.out.printf("%-10s%n", "accountID");
     System.out.printf("%-10s %-15s%n", "accountID", "accountBalance");
     if (rs.next()) {
       System.out.printf("%-10s %-15s%n",
