@@ -39,10 +39,11 @@ public class SecurityManager {
     ps.close();
   }
 
-  private void addToWatchlist(int securityID) throws SQLException {
-    String query = "{CALL add_to_watchlist(?)}";
+  private void addToWatchlist(int userID, int securityID) throws SQLException {
+    String query = "{CALL add_to_watchlist(?, ?)}";
     PreparedStatement stmt = connection.prepareStatement(query);
-    stmt.setInt(1, securityID);
+    stmt.setInt(1, userID);
+    stmt.setInt(2, securityID);
     stmt.executeUpdate();
     String message = "Security " + securityID + " is added to watchlist successfully!";
     System.out.println(message);
@@ -57,7 +58,7 @@ public class SecurityManager {
     if (scanner.hasNext()) {
       amount = scanner.nextFloat();
     }
-    String query = "{CALL buy(?)}";
+    String query = "{CALL buy(?, ?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
     stmt.setInt(1, securityID);
     stmt.setInt(2, portfolioID);
@@ -138,6 +139,7 @@ public class SecurityManager {
   private void selectedSecurityMenu(int securityID) {
     int choice = 0;
     int portfolioID = 0;
+    int userID = 0; // Initialize user id variable
     while (true) {
       System.out.println("1. Add to watchlist 2. Buy 3. Sell 4. View historical price 5. Back");
       System.out.print("Enter your choice: ");
@@ -145,8 +147,16 @@ public class SecurityManager {
         choice = scanner.nextInt();
       }
       if (choice == 1) {
+        // Prompt user to enter user id
+        System.out.print("Enter the amount to add to the watchlist");
+        if (scanner.hasNextInt()) {
+          userID = scanner.nextInt();
+        } else {
+          System.out.println("Invalid input for amount. Please enter a valid number.");
+          continue; // Continue to the next iteration of the loop
+        }
         try {
-          addToWatchlist(securityID);
+          addToWatchlist(userID, securityID);
         } catch (SQLException e) {
           System.out.println("Failed to add to the watchlist.");
           System.out.println(e.getMessage());

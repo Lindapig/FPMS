@@ -22,29 +22,33 @@ public class AccountManager {
     this.scanner = scanner;
   }
 
-  private void deposit() throws SQLException {
+  private void deposit(int userID) throws SQLException {
     float amount = 0;
     System.out.print("\nHow much money($) do you want to deposit in your account? ");
     if (scanner.hasNext()) {
       amount = scanner.nextFloat();
     }
-    String query = "{CALL deposit(?)}";
+    String query = "{CALL deposit(?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setFloat(1, amount);
+    stmt.setInt(1, userID);
+    stmt.setFloat(2, amount);
+    stmt.execute();
     String message = "Deposit " + amount + " in your account successfully!";
     System.out.println(message);
 
   }
 
-  private void withdraw() throws SQLException {
+  private void withdraw(int userID) throws SQLException {
     float amount = 0;
     System.out.print("\nHow much money($) do you want to withdraw from your account? ");
     if (scanner.hasNext()) {
       amount = scanner.nextFloat();
     }
-    String query = "{CALL withdraw(?)}";
+    String query = "{CALL withdraw(?, ?)}";
     CallableStatement stmt = connection.prepareCall(query);
-    stmt.setFloat(1, amount);
+    stmt.setInt(1, userID);
+    stmt.setFloat(2, amount);
+    stmt.execute();
     String message = "Withdraw " + amount + " from your account successfully!";
     System.out.println(message);
   }
@@ -95,7 +99,7 @@ public class AccountManager {
   /**
    * Account menu.
    */
-  public void accountMenu() {
+  public void accountMenu(int userID) {
     while (true) {
       System.out.println("Account Menu: 1. Check balance 2. Deposit 3. Withdraw "
               + "4. Search transaction 5. Back to main menu");
@@ -113,7 +117,7 @@ public class AccountManager {
       } else if (choice == 2) {
         // Logic for deposit
         try {
-          deposit();
+          deposit(userID);
         } catch (SQLException e) {
           System.out.println("Failed to deposit.");
           System.out.println(e.getMessage());
@@ -121,7 +125,7 @@ public class AccountManager {
       } else if (choice == 3) {
         // Logic for withdrawal
         try {
-          withdraw();
+          withdraw(userID);
         } catch (SQLException e) {
           System.out.println("Failed to withdraw.");
           System.out.println(e.getMessage());

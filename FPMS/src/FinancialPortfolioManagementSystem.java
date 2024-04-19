@@ -129,6 +129,10 @@ public class FinancialPortfolioManagementSystem {
           System.out.println("Invalid choice. Please try again.");
         }
       } else {
+        // Prompt for userID here
+        System.out.print("Enter your userID: ");
+        int userID = scanner.nextInt();
+
         int menuChoice = utility.displayMainMenu();
         if (menuChoice == 1) {
           try {
@@ -154,7 +158,7 @@ public class FinancialPortfolioManagementSystem {
         } else if (menuChoice == 4) {
           try {
             // Account menu
-            accountManager.accountMenu();
+            accountManager.accountMenu(userID);
           } catch (Exception e) {
             System.out.println(e.getMessage());
           }
